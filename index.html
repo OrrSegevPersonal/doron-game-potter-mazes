@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#0e0b1e" />
+  <title>מבוכי הוגוורטס</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- Top HUD -->
+    <header id="hud" class="hidden">
+      <div class="hud-left">
+        <span id="hud-level" class="hud-chip">מבוך 1</span>
+        <span id="hud-magic" class="hud-chip magic-chip hidden">✨ 0/3</span>
+      </div>
+      <div class="hud-right">
+        <span id="hud-timer" class="hud-chip">00:00</span>
+      </div>
+    </header>
+
+    <!-- Maze canvas -->
+    <main id="stage">
+      <canvas id="maze-canvas"></canvas>
+    </main>
+
+    <!-- D-pad controls -->
+    <nav id="dpad" class="hidden" aria-label="שליטה">
+      <button class="dpad-btn" data-dir="up" aria-label="למעלה">▲</button>
+      <div class="dpad-mid">
+        <button class="dpad-btn" data-dir="left" aria-label="שמאלה">◀</button>
+        <button class="dpad-btn" data-dir="down" aria-label="למטה">▼</button>
+        <button class="dpad-btn" data-dir="right" aria-label="ימינה">▶</button>
+      </div>
+    </nav>
+
+    <!-- ============ OVERLAYS ============ -->
+
+    <!-- Character select -->
+    <section id="screen-select" class="overlay">
+      <div class="panel">
+        <h1 class="title">מבוכי הוגוורטס</h1>
+        <p class="subtitle">בחרי את דמותך לסבב המשחק</p>
+        <div class="char-grid">
+          <button class="char-card" data-char="witch">
+            <span class="char-emoji">🧙‍♀️</span>
+            <span class="char-name">מכשפה</span>
+          </button>
+          <button class="char-card" data-char="wizard">
+            <span class="char-emoji">🧙‍♂️</span>
+            <span class="char-name">קוסם</span>
+          </button>
+        </div>
+        <p id="best-time" class="best-time hidden"></p>
+        <button id="open-board-btn" class="ghost-btn">🗺️ מפת הקונדסאים</button>
+        <p class="credit">פותח ע״י דורון שגב, 2026</p>
+      </div>
+    </section>
+
+    <!-- Riddle modal -->
+    <section id="screen-riddle" class="overlay hidden">
+      <div class="panel riddle-panel">
+        <div class="lives" id="lives" aria-label="חיים"></div>
+        <p class="gate-tag" id="gate-tag">שער 1 מתוך 5</p>
+        <h2 class="riddle-q" id="riddle-q"></h2>
+        <div class="options" id="options"></div>
+        <button id="magic-skip" class="magic-skip hidden">✨ הפעילי קסם ודלגי על החידה</button>
+      </div>
+    </section>
+
+    <!-- Death screen -->
+    <section id="screen-dead" class="overlay hidden">
+      <div class="panel">
+        <div class="big-emoji">💀</div>
+        <h2 class="title">אוי לא!</h2>
+        <p class="subtitle">נגמרו לך החיים. הרמה מתחילה מחדש.</p>
+        <button id="retry-btn" class="primary-btn">נסי שוב</button>
+      </div>
+    </section>
+
+    <!-- Level complete flash -->
+    <section id="screen-level" class="overlay hidden">
+      <div class="panel">
+        <div class="big-emoji">🏆</div>
+        <h2 class="title" id="level-title">עברת את המבוך!</h2>
+        <p class="subtitle" id="level-sub"></p>
+        <button id="next-btn" class="primary-btn">למבוך הבא</button>
+      </div>
+    </section>
+
+    <!-- Win screen -->
+    <section id="screen-win" class="overlay hidden">
+      <canvas id="fireworks-canvas"></canvas>
+      <div class="panel win-panel">
+        <div class="big-emoji">🎆</div>
+        <h1 class="title">ניצחת!</h1>
+        <p class="subtitle">עברת את כל 5 המבוכים של הוגוורטס!</p>
+        <p class="win-time" id="win-time"></p>
+        <p class="win-best" id="win-best"></p>
+        <div class="name-entry" id="name-entry">
+          <label for="win-name">רשמי את שמך למפת הקונדסאים:</label>
+          <input id="win-name" type="text" maxlength="14" placeholder="השם שלך" autocomplete="off" />
+          <button id="save-score-btn" class="primary-btn">שמרי בלוח התוצאות</button>
+        </div>
+        <button id="play-again-btn" class="ghost-btn">לשחק שוב</button>
+      </div>
+    </section>
+
+    <!-- Leaderboard — Marauder's Map -->
+    <section id="screen-board" class="overlay hidden">
+      <div class="map-panel">
+        <p class="map-oath">"אני נשבעת חגיגית שכוונותיי אינן טהורות"</p>
+        <h1 class="map-title">מפת הקונדסאים</h1>
+        <p class="map-sub">קרניים, רך כף, ירחוני וזנב תולע<br />גאים להציג את שועלי המבוכים</p>
+        <ol class="board-list" id="board-list"></ol>
+        <p class="board-empty hidden" id="board-empty">עדיין לא נמצא איש על המפה…<br />היי הראשונה לסיים את כל 5 המבוכים!</p>
+        <div class="map-actions">
+          <button id="board-again-btn" class="map-btn hidden">לשחק שוב</button>
+          <button id="board-close-btn" class="map-btn">מזימה הושלמה</button>
+        </div>
+        <p class="map-credit">פותח ע״י דורון שגב, 2026</p>
+      </div>
+    </section>
+  </div>
+
+  <!-- Scripts (plain modules loaded in order) -->
+  <script src="js/config.js"></script>
+  <script src="js/rng.js"></script>
+  <script src="js/riddles.js"></script>
+  <script src="js/maze.js"></script>
+  <script src="js/gates.js"></script>
+  <script src="js/player.js"></script>
+  <script src="js/magic.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/input.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/game.js"></script>
+</body>
+</html>
