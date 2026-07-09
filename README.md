@@ -4,7 +4,7 @@
 
 משחק ווב לנייד: עברה פרוצדורלית במבוכים עם 100 חידות עלילתיות, חלקי קסם, ולוח תוצאות בסגנון מפת הקונדסאים.
 
-🎮 **[משחקי עכשיו](http://localhost:8123)** (locally)
+🎮 **[משחקי עכשיו](http://localhost:8080)** (locally)
 
 ## מאפיינים
 
@@ -32,7 +32,7 @@ node server.js
 python3 -m http.server 8000
 ```
 
-פתח `http://localhost:8123` בדפדפן (או PORT שציינת).
+פתח `http://localhost:8080` בדפדפן (או PORT שציינת).
 
 ---
 
@@ -70,7 +70,7 @@ CMD ["node", "server.js"]
 Railway יהקצה PORT דינמי. עדכן `server.js`:
 
 ```javascript
-const PORT = process.env.PORT || 8123;
+const PORT = process.env.PORT || 8080;
 ```
 
 (כבר מוכן בקובץ!)

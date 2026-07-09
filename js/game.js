@@ -41,7 +41,7 @@ const Game = {
   // ---------- run / level lifecycle ----------
   startRun(character) {
     this.character = character;
-    this.playerEmoji = character === "wizard" ? "🧙‍♂️" : "🧙‍♀️";
+    this.playerEmoji = (HOUSES[character] || HOUSES.gryffindor).emoji;
     RNG.seed(CONFIG.SEED);
     this.level = 1;
     this.startTime = performance.now();
@@ -182,7 +182,7 @@ const Game = {
     const isRecord = Storage.saveBest(ms);
     UI.winScreen(ms, isRecord, {
       onSave: (name) => {
-        const rank = Storage.addScore(name, this.lastWinMs);
+        const rank = Storage.addScore(name, this.lastWinMs, this.playerEmoji);
         UI.showBoard({
           highlightIndex: rank,
           showAgain: true,

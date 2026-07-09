@@ -39,10 +39,10 @@ const Storage = {
 
   // Add a score {name, ms}. Returns the 0-based rank it landed at (or -1 if it
   // didn't make the top list).
-  addScore(name, ms) {
+  addScore(name, ms, house) {
     const clean = (name || "").trim().slice(0, 14) || "אלמוני/ת";
     const scores = this.getScores();
-    const entry = { name: clean, ms, ts: Date.now() };
+    const entry = { name: clean, ms, ts: Date.now(), house: house || "" };
     scores.push(entry);
     scores.sort((a, b) => a.ms - b.ms);
     const trimmed = scores.slice(0, this.BOARD_MAX);

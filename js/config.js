@@ -16,3 +16,12 @@ const CONFIG = {
   // seed: null => random each run. Set a number to reproduce mazes in tests.
   SEED: null,
 };
+
+// Hogwarts houses — single-codepoint emoji so they render as one glyph on iOS
+// canvas (ZWJ sequences like 🧙‍♀️ split into two glyphs there).
+const HOUSES = {
+  gryffindor: { emoji: "🦁", name: "גריפינדור" },
+  hufflepuff: { emoji: "🦡", name: "הפלפאף" },
+  ravenclaw:  { emoji: "🦅", name: "רייבנקלו" },
+  slytherin:  { emoji: "🐍", name: "סלית׳רין" },
+};

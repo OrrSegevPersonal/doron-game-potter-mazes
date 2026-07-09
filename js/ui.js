@@ -163,7 +163,7 @@ const UI = {
       nameBlock.className = "name";
       const name = document.createElement("span");
       name.className = "name-text";
-      name.textContent = s.name;
+      name.textContent = s.house ? s.house + " " + s.name : s.name;
       nameBlock.appendChild(name);
       const dateStr = formatDate(s.ts);
       if (dateStr) {

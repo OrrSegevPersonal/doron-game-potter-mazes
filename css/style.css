@@ -146,7 +146,7 @@ body {
 .big-emoji { font-size: 64px; margin-bottom: 8px; }
 
 /* ---------- Character select ---------- */
-.char-grid { display: flex; gap: 14px; justify-content: center; }
+.char-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .char-card {
   flex: 1;
   background: var(--panel-2);
@@ -161,9 +161,23 @@ body {
   transition: transform .08s, border-color .1s;
 }
 .char-card:active { transform: scale(.96); }
-.char-card.selected, .char-card:hover { border-color: var(--gold); }
+.char-card.selected, .char-card:hover { filter: brightness(1.12); }
 .char-emoji { font-size: 48px; }
 .char-name { font-size: 18px; font-weight: 700; }
+
+/* House colors — fill = background, second color = border/accent */
+.char-card[data-char="gryffindor"],
+.char-card[data-char="hufflepuff"],
+.char-card[data-char="ravenclaw"],
+.char-card[data-char="slytherin"] { border-width: 4px; }
+.char-card[data-char="gryffindor"] { background: #740001; border-color: #EEBA30; }
+.char-card[data-char="gryffindor"] .char-name { color: #EEBA30; }
+.char-card[data-char="hufflepuff"] { background: #FFD800; border-color: #000000; }
+.char-card[data-char="hufflepuff"] .char-name { color: #000000; }
+.char-card[data-char="ravenclaw"] { background: #0E1A40; border-color: #946B2D; }
+.char-card[data-char="ravenclaw"] .char-name { color: #C89B57; }
+.char-card[data-char="slytherin"] { background: #1A472A; border-color: #AAAAAA; }
+.char-card[data-char="slytherin"] .char-name { color: #D8D8D8; }
 .best-time { margin-top: 18px; color: var(--gold); font-size: 15px; }
 .credit { font-size: 12px; color: var(--muted); margin-top: 20px; margin-bottom: 0; }
 
