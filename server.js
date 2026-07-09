@@ -32,4 +32,4 @@ http
       res.end(data);
     });
   })
-  .listen(PORT, () => console.log("serving on http://localhost:" + PORT));
+  .listen(PORT, "0.0.0.0", () => console.log("serving on http://0.0.0.0:" + PORT));

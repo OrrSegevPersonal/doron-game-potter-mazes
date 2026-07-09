@@ -7,6 +7,6 @@ COPY index.html .
 COPY css/ ./css/
 COPY js/ ./js/
 
-EXPOSE 3000
+EXPOSE 8123
 
 CMD ["node", "server.js"]
