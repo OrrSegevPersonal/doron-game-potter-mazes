@@ -97,7 +97,7 @@ body {
   gap: 6px;
   padding: 8px 0 14px;
 }
-.dpad-mid { display: flex; gap: 6px; }
+.dpad-mid { display: flex; gap: 6px; direction: ltr; }
 .dpad-btn {
   width: 62px;
   height: 46px;
