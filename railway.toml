@@ -1,9 +1,6 @@
 [build]
 builder = "dockerfile"
 
-[start]
-cmd = "node server.js"
-
 [deploy]
-restartPolicyType = "never"
-restartPolicyMaxRetries = 0
+startCommand = "node server.js"
+restartPolicyType = "NEVER"
