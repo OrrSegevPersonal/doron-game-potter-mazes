@@ -10,6 +10,9 @@
 </head>
 <body>
   <div id="app">
+    <!-- Cumulative player count (menu only) -->
+    <div id="player-count" class="player-count hidden" aria-label="מספר השחקנים"></div>
+
     <!-- Top HUD -->
     <header id="hud" class="hidden">
       <div class="hud-left">
@@ -62,7 +65,10 @@
           </button>
         </div>
         <p id="best-time" class="best-time hidden"></p>
-        <button id="open-board-btn" class="ghost-btn">🗺️ מפת הקונדסאים</button>
+        <div class="menu-actions">
+          <button id="how-to-btn" class="ghost-btn">❓ כיצד לשחק</button>
+          <button id="open-board-btn" class="ghost-btn">🗺️ מפת הקונדסאים</button>
+        </div>
         <p class="credit">פותח ע״י דורון שגב, 2026</p>
       </div>
     </section>
@@ -129,6 +135,23 @@
           <button id="board-close-btn" class="map-btn">מזימה הושלמה</button>
         </div>
         <p class="map-credit">פותח ע״י דורון שגב, 2026</p>
+      </div>
+    </section>
+
+    <!-- How to play -->
+    <section id="screen-howto" class="overlay hidden">
+      <div class="panel howto-panel">
+        <h1 class="title">כיצד לשחק</h1>
+        <p class="subtitle">המטרה: לעבור את כל 5 המבוכים של הוגוורטס במהירות האפשרית!</p>
+        <ul class="howto-list">
+          <li><span class="howto-icon">🧭</span><span>נווטי במבוך עם החצים שבמסך או בהחלקת אצבע. בכל שלב המבוך גדל וקשה יותר.</span></li>
+          <li><span class="howto-icon">🚪</span><span>בכל מבוך יש 5 שערים. כדי לפתוח שער עלייך לענות נכון על חידה מעולם הארי פוטר.</span></li>
+          <li><span class="howto-icon">❤️</span><span>לכל חידה יש 3 חיים. כל תשובה שגויה מסירה אפשרות ולב אחד. אם נגמרו החיים — הרמה מתחילה מחדש.</span></li>
+          <li><span class="howto-icon">✨</span><span>מהמבוך השני מופיעים חלקי קסם. אספי 3 כדי לדלג על חידה. החלקים נשמרים בין השלבים עד שמשתמשים בהם!</span></li>
+          <li><span class="howto-icon">⭐</span><span>השער החמישי הוא שער היציאה — עברי אותו כדי לסיים את המבוך ולעבור לשלב הבא.</span></li>
+          <li><span class="howto-icon">🗺️</span><span>סיימי את כל 5 המבוכים כדי להיכנס למפת הקונדסאים — לוח התוצאות של השחקנים המהירים.</span></li>
+        </ul>
+        <button id="howto-close-btn" class="primary-btn">הבנתי, קדימה!</button>
       </div>
     </section>
   </div>

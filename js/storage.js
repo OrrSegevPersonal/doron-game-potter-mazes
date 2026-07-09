@@ -37,8 +37,36 @@ const Storage = {
     }
   },
 
-  // Add a score {name, ms}. Returns the 0-based rank it landed at (or -1 if it
-  // didn't make the top list).
+  // ----- Shared (global) leaderboard via the server API -----
+  // Falls back to the local list if the API can't be reached.
+  fetchScores() {
+    return fetch("/api/scores")
+      .then((r) => r.json())
+      .then((d) => (d && Array.isArray(d.scores) ? d.scores : this.getScores()))
+      .catch(() => this.getScores());
+  },
+
+  // Submit a score to the shared board. Resolves {scores, rank}. On failure,
+  // stores locally so the player still sees their result.
+  submitScore(name, ms, house) {
+    return fetch("/api/scores", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: name, ms: ms, house: house }),
+    })
+      .then((r) => r.json())
+      .then((d) => {
+        if (d && Array.isArray(d.scores)) return { scores: d.scores, rank: d.rank };
+        throw new Error("bad response");
+      })
+      .catch(() => {
+        const rank = this.addScore(name, ms, house);
+        return { scores: this.getScores(), rank: rank };
+      });
+  },
+
+  // Add a score to the LOCAL list (fallback/offline). Returns the 0-based rank
+  // it landed at (or -1 if it didn't make the top list).
   addScore(name, ms, house) {
     const clean = (name || "").trim().slice(0, 14) || "אלמוני/ת";
     const scores = this.getScores();

@@ -9,8 +9,25 @@ const UI = {
     this.hudTimer = document.getElementById("hud-timer");
 
     this.overlays = document.querySelectorAll(".overlay");
+    this.playerCount = document.getElementById("player-count");
+    this._pcLoaded = false;   // becomes true once the count is known
+    this._onMenu = false;     // badge only shows on the character-select screen
     this.optionButtons = [];
     this._fireworks = null;
+  },
+
+  // Cumulative player count. n === null keeps the badge hidden (API unreachable).
+  setPlayerCount(n) {
+    if (n === null || n === undefined) { this._pcLoaded = false; }
+    else {
+      this._pcLoaded = true;
+      this.playerCount.innerHTML =
+        '🧙 <span class="pc-num">' + Number(n).toLocaleString("he-IL") + "</span> קוסמים";
+    }
+    this._updatePlayerCount();
+  },
+  _updatePlayerCount() {
+    this.playerCount.classList.toggle("hidden", !(this._onMenu && this._pcLoaded));
   },
 
   // --- overlay + chrome visibility ---
@@ -20,10 +37,13 @@ const UI = {
   showOverlay(id) {
     this.hideAllOverlays();
     document.getElementById(id).classList.remove("hidden");
+    this._onMenu = id === "screen-select";
+    this._updatePlayerCount();
   },
   setPlaying(on) {
     this.hud.classList.toggle("hidden", !on);
     this.dpad.classList.toggle("hidden", !on);
+    if (on) { this._onMenu = false; this._updatePlayerCount(); }
   },
 
   // --- HUD ---
@@ -50,6 +70,13 @@ const UI = {
     document.querySelectorAll(".char-card").forEach((card) => {
       card.onclick = () => onPick(card.getAttribute("data-char"));
     });
+  },
+
+  // --- How to play ---
+  showHowTo(onClose) {
+    this.setPlaying(false);
+    this.showOverlay("screen-howto");
+    document.getElementById("howto-close-btn").onclick = onClose || null;
   },
 
   // --- Riddle modal ---
@@ -140,22 +167,45 @@ const UI = {
   },
 
   // --- Leaderboard (Marauder's Map) ---
-  // opts: { highlightIndex=-1, showAgain=false, onAgain, onClose }
+  // opts: { highlightIndex=-1, showAgain=false, onAgain, onClose, scores }
+  // If opts.scores is given it renders those directly (e.g. the just-submitted
+  // list); otherwise it fetches the shared board from the server.
   showBoard(opts) {
     const o = opts || {};
     this.setPlaying(false);
     this.showOverlay("screen-board");
-    const scores = Storage.getScores();
 
+    const again = document.getElementById("board-again-btn");
+    again.classList.toggle("hidden", !o.showAgain);
+    again.onclick = o.onAgain || null;
+    document.getElementById("board-close-btn").onclick = o.onClose || null;
+
+    if (o.scores) {
+      this._renderBoard(o.scores, o.highlightIndex);
+    } else {
+      this._renderBoardLoading();
+      Storage.fetchScores().then((scores) => this._renderBoard(scores, o.highlightIndex));
+    }
+  },
+
+  _renderBoardLoading() {
+    document.getElementById("board-list").innerHTML = "";
+    const empty = document.getElementById("board-empty");
+    empty.classList.remove("hidden");
+    empty.textContent = "טוען את מפת הקונדסאים…";
+  },
+
+  _renderBoard(scores, highlightIndex) {
     const list = document.getElementById("board-list");
     const empty = document.getElementById("board-empty");
     list.innerHTML = "";
     empty.classList.toggle("hidden", scores.length > 0);
+    empty.innerHTML = "עדיין לא נמצא איש על המפה…<br />היי הראשונה לסיים את כל 5 המבוכים!";
 
     const medals = ["🥇", "🥈", "🥉"];
     scores.forEach((s, i) => {
       const li = document.createElement("li");
-      li.className = "board-row" + (i === o.highlightIndex ? " me" : "");
+      li.className = "board-row" + (i === highlightIndex ? " me" : "");
       const rank = document.createElement("span");
       rank.className = "rank";
       rank.textContent = medals[i] || "👣";
@@ -180,11 +230,6 @@ const UI = {
       li.append(rank, nameBlock, dots, time);
       list.appendChild(li);
     });
-
-    const again = document.getElementById("board-again-btn");
-    again.classList.toggle("hidden", !o.showAgain);
-    again.onclick = o.onAgain || null;
-    document.getElementById("board-close-btn").onclick = o.onClose || null;
   },
 
   // --- Fireworks particle animation ---

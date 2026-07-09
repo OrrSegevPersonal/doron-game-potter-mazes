@@ -8,10 +8,17 @@ class MagicManager {
     this.nextMoveAt = 0;    // timestamp for next relocation
   }
 
-  reset(level) {
-    this.enabled = level >= CONFIG.MAGIC_FROM_LEVEL;
+  // Start a fresh maze. `pieces` is the count carried over from earlier levels —
+  // if the player is already at the target, no new piece should appear.
+  reset(level, pieces) {
+    this.enabled = level >= CONFIG.MAGIC_FROM_LEVEL && (pieces || 0) < CONFIG.MAGIC_TARGET;
     this.piece = null;
     this.nextMoveAt = 0;
+  }
+
+  // Re-enable spawning within the current maze (e.g. after magic was spent).
+  resume(level, pieces) {
+    this.enabled = level >= CONFIG.MAGIC_FROM_LEVEL && (pieces || 0) < CONFIG.MAGIC_TARGET;
   }
 
   // Ensure a piece exists when it should. `collected` is the current piece count.

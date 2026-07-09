@@ -21,6 +21,14 @@ const Game = {
       UI.showBoard({ showAgain: false, onClose: () => this.showMenu() });
     };
 
+    // How-to-play button on the main screen
+    document.getElementById("how-to-btn").onclick = () => {
+      UI.showHowTo(() => this.showMenu());
+    };
+
+    // Cumulative global player count (unique device = +1)
+    this._loadPlayerCount();
+
     // Show the main menu
     this.showMenu();
 
@@ -30,6 +38,21 @@ const Game = {
       requestAnimationFrame(loop);
     };
     requestAnimationFrame(loop);
+  },
+
+  // ---------- player count ----------
+  _loadPlayerCount() {
+    const KEY = "hp_maze_counted";
+    let counted = false;
+    try { counted = !!localStorage.getItem(KEY); } catch (e) { /* ignore */ }
+    // First visit on this device increments the global total; later visits read it.
+    fetch("/api/players", { method: counted ? "GET" : "POST" })
+      .then((r) => r.json())
+      .then((d) => {
+        if (!counted) { try { localStorage.setItem(KEY, "1"); } catch (e) { /* ignore */ } }
+        UI.setPlayerCount(d && typeof d.count === "number" ? d.count : null);
+      })
+      .catch(() => UI.setPlayerCount(null));
   },
 
   // ---------- menu ----------
@@ -46,6 +69,7 @@ const Game = {
     this.level = 1;
     this.startTime = performance.now();
     this.lastAnswerPositions = []; // persists across the whole run (not per-level)
+    this.magicPieces = 0;          // persists across levels until spent on a skip
     this.startLevel();
   },
 
@@ -54,16 +78,19 @@ const Game = {
     this.maze = new Maze(size);
     this.player = new Player(this.maze);
     this.gates = buildGates(this.maze);
-    this.magic.reset(this.level);
-    this.magicPieces = 0;
-    this.magicUsedThisLevel = false;
+    this.magic.reset(this.level, this.magicPieces); // pieces carry over between levels
     this.usedRiddleIds = new Set();
 
     this.state = "PLAYING";
     UI.hideAllOverlays();
     UI.setPlaying(true);
-    UI.setHud(this.level, this.magic.enabled, this.magicPieces);
+    UI.setHud(this.level, this._magicActive(), this.magicPieces);
     this._resizeCanvas();
+  },
+
+  // Magic is a feature from maze 2 onward — controls whether the HUD chip shows.
+  _magicActive() {
+    return this.level >= CONFIG.MAGIC_FROM_LEVEL;
   },
 
   // ---------- per-frame tick ----------
@@ -84,7 +111,7 @@ const Game = {
     if (this.magic.tryCollect(this.player)) {
       this.magicPieces = Math.min(CONFIG.MAGIC_TARGET, this.magicPieces + 1);
       if (this.magicPieces >= CONFIG.MAGIC_TARGET) this.magic.stop();
-      UI.setHud(this.level, this.magic.enabled || this.magicPieces >= CONFIG.MAGIC_TARGET, this.magicPieces);
+      UI.setHud(this.level, this._magicActive(), this.magicPieces);
     }
 
     // reached a gate?
@@ -112,7 +139,7 @@ const Game = {
     this.lastAnswerPositions.push(answerIndex);
     if (this.lastAnswerPositions.length > 2) this.lastAnswerPositions.shift();
 
-    const canSkip = this.magicPieces >= CONFIG.MAGIC_TARGET && !this.magicUsedThisLevel;
+    const canSkip = this.magicPieces >= CONFIG.MAGIC_TARGET;
 
     UI.setLives(this.lives);
     UI.renderRiddle(
@@ -141,9 +168,9 @@ const Game = {
   },
 
   _useMagic() {
-    this.magicUsedThisLevel = true;
     this.magicPieces = 0;
-    UI.setHud(this.level, false, this.magicPieces);
+    this.magic.resume(this.level, this.magicPieces); // pieces can be collected again
+    UI.setHud(this.level, this._magicActive(), this.magicPieces);
     this._passGate();
   },
 
@@ -182,12 +209,14 @@ const Game = {
     const isRecord = Storage.saveBest(ms);
     UI.winScreen(ms, isRecord, {
       onSave: (name) => {
-        const rank = Storage.addScore(name, this.lastWinMs, this.playerEmoji);
-        UI.showBoard({
-          highlightIndex: rank,
-          showAgain: true,
-          onAgain: () => this.showMenu(),
-          onClose: () => this.showMenu(),
+        Storage.submitScore(name, this.lastWinMs, this.playerEmoji).then((res) => {
+          UI.showBoard({
+            scores: res.scores,
+            highlightIndex: res.rank,
+            showAgain: true,
+            onAgain: () => this.showMenu(),
+            onClose: () => this.showMenu(),
+          });
         });
       },
       // new run: character is re-chosen (choice is fixed only within a run)
