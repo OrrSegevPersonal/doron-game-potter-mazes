@@ -1,5 +1,7 @@
+import { DIRS } from "./maze.js";
+
 // Player position + movement against the maze walls.
-class Player {
+export class Player {
   constructor(maze) {
     this.maze = maze;
     this.x = maze.start.x;

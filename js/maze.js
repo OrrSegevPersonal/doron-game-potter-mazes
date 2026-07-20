@@ -1,14 +1,16 @@
+import { RNG } from "./rng.js";
+
 // Procedural maze generation (Recursive Backtracker) + BFS solver.
 // Cell model: each cell has 4 walls; carving removes walls between neighbors.
 
-const DIRS = {
+export const DIRS = {
   up:    { dx: 0, dy: -1, wall: "top",    opp: "bottom" },
   down:  { dx: 0, dy: 1,  wall: "bottom", opp: "top" },
   left:  { dx: -1, dy: 0, wall: "left",   opp: "right" },
   right: { dx: 1, dy: 0,  wall: "right",  opp: "left" },
 };
 
-class Maze {
+export class Maze {
   constructor(size) {
     this.cols = size;
     this.rows = size;

@@ -10,7 +10,7 @@ function mulberry32(seed) {
   };
 }
 
-const RNG = {
+export const RNG = {
   _rand: Math.random,
 
   // Seed the generator. Pass null/undefined for a random seed.

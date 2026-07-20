@@ -4,7 +4,7 @@
 //  - gate 5 is the exit gate at the end of the path (leads to the next maze).
 // Positions vary every maze because the path itself is procedural.
 
-function buildGates(maze) {
+export function buildGates(maze) {
   const path = maze.solvePath(maze.start, maze.exit);
   const L = path.length;
   const gates = [];
@@ -30,7 +30,7 @@ function buildGates(maze) {
 }
 
 // Find an unopened gate at a cell, or null.
-function gateAt(gates, x, y) {
+export function gateAt(gates, x, y) {
   for (const g of gates) {
     if (g.x === x && g.y === y && !g.opened) return g;
   }

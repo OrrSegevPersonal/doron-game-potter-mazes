@@ -1,5 +1,5 @@
 // Best-time persistence in localStorage.
-const Storage = {
+export const Storage = {
   KEY: "hp_maze_best_ms",
 
   getBest() {
@@ -48,11 +48,11 @@ const Storage = {
 
   // Submit a score to the shared board. Resolves {scores, rank}. On failure,
   // stores locally so the player still sees their result.
-  submitScore(name, ms, house) {
+  submitScore(name, ms, house, token) {
     return fetch("/api/scores", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: name, ms: ms, house: house }),
+      body: JSON.stringify({ name: name, ms: ms, house: house, token: token || "" }),
     })
       .then((r) => r.json())
       .then((d) => {
@@ -82,7 +82,7 @@ const Storage = {
 };
 
 // Format milliseconds as MM:SS.
-function formatTime(ms) {
+export function formatTime(ms) {
   const total = Math.floor(ms / 1000);
   const m = Math.floor(total / 60);
   const s = total % 60;
@@ -90,7 +90,7 @@ function formatTime(ms) {
 }
 
 // Format a timestamp (ms) as DD.MM.YY. Returns "" if missing.
-function formatDate(ts) {
+export function formatDate(ts) {
   if (!ts) return "";
   const d = new Date(ts);
   const dd = String(d.getDate()).padStart(2, "0");

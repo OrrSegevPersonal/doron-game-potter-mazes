@@ -1,5 +1,5 @@
 // Global game configuration & tunable constants.
-const CONFIG = {
+export const CONFIG = {
   TOTAL_LEVELS: 5,
   GATES_PER_LEVEL: 5,
   START_LIVES: 3,
@@ -19,7 +19,7 @@ const CONFIG = {
 
 // Hogwarts houses — single-codepoint emoji so they render as one glyph on iOS
 // canvas (ZWJ sequences like 🧙‍♀️ split into two glyphs there).
-const HOUSES = {
+export const HOUSES = {
   gryffindor: { emoji: "🦁", name: "גריפינדור" },
   hufflepuff: { emoji: "🦡", name: "הפלפאף" },
   ravenclaw:  { emoji: "🦅", name: "רייבנקלו" },

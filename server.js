@@ -3,6 +3,7 @@
 const http = require("http");
 const fs = require("fs");
 const path = require("path");
+const crypto = require("crypto");
 
 const ROOT = __dirname;
 const PORT = process.env.PORT || 8080;
@@ -13,6 +14,28 @@ const DATA_DIR = process.env.DATA_DIR || path.join(ROOT, "data");
 const COUNTER_FILE = path.join(DATA_DIR, "players.json");
 const SCORES_FILE = path.join(DATA_DIR, "scores.json");
 const BOARD_MAX = 10; // keep only the fastest 10 on the shared leaderboard
+
+// --- Run tokens: proof that a real game session started on this server ---
+// A score is accepted only with a token issued by /api/run/start, and the
+// claimed time may not beat the elapsed time the server itself observed.
+// This keeps devtools tricks (resetting the client timer, calling the win
+// handler directly, or POSTing to /api/scores by hand) off the shared board.
+const RUN_TOKENS = new Map(); // token -> startedAt (Date.now())
+const TOKEN_TTL_MS = 2 * 60 * 60 * 1000; // forget runs older than 2h
+const MAX_TOKENS = 500;                  // hard cap so the map can't grow unbounded
+const MIN_WIN_MS = 30000;                // even a perfect run of 5 mazes takes longer
+const CLOCK_TOLERANCE_MS = 10000;        // network/clock slack when comparing times
+
+function pruneTokens() {
+  const now = Date.now();
+  for (const [t, startedAt] of RUN_TOKENS) {
+    if (now - startedAt > TOKEN_TTL_MS) RUN_TOKENS.delete(t);
+  }
+  // Still over cap (burst of starts): drop oldest first (Map keeps insertion order).
+  while (RUN_TOKENS.size >= MAX_TOKENS) {
+    RUN_TOKENS.delete(RUN_TOKENS.keys().next().value);
+  }
+}
 
 function ensureDataDir() {
   try { fs.mkdirSync(DATA_DIR, { recursive: true }); } catch (e) { /* ignore */ }
@@ -92,14 +115,35 @@ http
       return sendJson(res, { count: readCount() });
     }
 
+    // --- Run-start API ---
+    // POST /api/run/start -> {token}. Called when a run begins; the server
+    // remembers when, so a submitted score can be checked against real time.
+    if (urlPath === "/api/run/start" && req.method === "POST") {
+      pruneTokens();
+      const token = crypto.randomUUID();
+      RUN_TOKENS.set(token, Date.now());
+      return sendJson(res, { token: token });
+    }
+
     // --- Shared leaderboard API ---
     // GET  /api/scores -> top list (fastest first)
-    // POST /api/scores {name, ms, house} -> add, return {scores, rank}
+    // POST /api/scores {name, ms, house, token} -> add, return {scores, rank}
+    // A score without a valid run token, faster than MIN_WIN_MS, or faster than
+    // the server-observed elapsed time is rejected with rank -1.
     if (urlPath === "/api/scores") {
       if (req.method === "POST") {
         readJsonBody(req, (body) => {
           const ms = Number(body.ms);
-          if (!Number.isFinite(ms) || ms <= 0) {
+          const token = typeof body.token === "string" ? body.token : "";
+          const startedAt = RUN_TOKENS.get(token);
+          if (startedAt !== undefined) RUN_TOKENS.delete(token); // one score per run
+          const serverMs = startedAt !== undefined ? Date.now() - startedAt : -1;
+          const valid =
+            Number.isFinite(ms) &&
+            ms >= MIN_WIN_MS &&
+            serverMs >= 0 &&
+            ms <= serverMs + CLOCK_TOLERANCE_MS;
+          if (!valid) {
             return sendJson(res, { scores: readScores(), rank: -1 });
           }
           const rec = {

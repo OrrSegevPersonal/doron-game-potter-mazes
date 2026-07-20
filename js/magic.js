@@ -1,7 +1,10 @@
+import { CONFIG } from "./config.js";
+import { RNG } from "./rng.js";
+
 // Magic-piece manager. From maze 2 onward a single magic piece is always on the
 // board; it relocates every 15s or when collected. Once 3 pieces are collected
 // no more pieces appear for the current maze.
-class MagicManager {
+export class MagicManager {
   constructor() {
     this.enabled = false;
     this.piece = null;      // {x,y} | null

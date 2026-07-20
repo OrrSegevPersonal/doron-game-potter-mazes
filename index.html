@@ -156,17 +156,8 @@
     </section>
   </div>
 
-  <!-- Scripts (plain modules loaded in order) -->
-  <script src="js/config.js"></script>
-  <script src="js/rng.js"></script>
-  <script src="js/riddles.js"></script>
-  <script src="js/maze.js"></script>
-  <script src="js/gates.js"></script>
-  <script src="js/player.js"></script>
-  <script src="js/magic.js"></script>
-  <script src="js/storage.js"></script>
-  <script src="js/input.js"></script>
-  <script src="js/ui.js"></script>
-  <script src="js/game.js"></script>
+  <!-- Single ES-module entry point: keeps game internals out of the global
+       scope so they can't be manipulated from the browser console. -->
+  <script type="module" src="js/game.js"></script>
 </body>
 </html>

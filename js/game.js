@@ -1,3 +1,14 @@
+import { CONFIG, HOUSES } from "./config.js";
+import { RNG } from "./rng.js";
+import { pickRiddle, shuffleOptions } from "./riddles.js";
+import { Maze } from "./maze.js";
+import { buildGates, gateAt } from "./gates.js";
+import { Player } from "./player.js";
+import { MagicManager } from "./magic.js";
+import { Storage } from "./storage.js";
+import { Input } from "./input.js";
+import { UI } from "./ui.js";
+
 // Game controller: state machine, canvas rendering, and wiring of all modules.
 const Game = {
   state: "CHARACTER_SELECT",
@@ -68,6 +79,14 @@ const Game = {
     RNG.seed(CONFIG.SEED);
     this.level = 1;
     this.startTime = performance.now();
+    // Server-issued proof of when this run started; required to submit a
+    // score to the shared leaderboard. On failure the score falls back to
+    // the local board (same as playing offline).
+    this.runToken = null;
+    fetch("/api/run/start", { method: "POST" })
+      .then((r) => r.json())
+      .then((d) => { this.runToken = (d && d.token) || null; })
+      .catch(() => {});
     this.lastAnswerPositions = []; // persists across the whole run (not per-level)
     this.magicPieces = 0;          // persists across levels until spent on a skip
     this.startLevel();
@@ -209,7 +228,7 @@ const Game = {
     const isRecord = Storage.saveBest(ms);
     UI.winScreen(ms, isRecord, {
       onSave: (name) => {
-        Storage.submitScore(name, this.lastWinMs, this.playerEmoji).then((res) => {
+        Storage.submitScore(name, this.lastWinMs, this.playerEmoji, this.runToken).then((res) => {
           UI.showBoard({
             scores: res.scores,
             highlightIndex: res.rank,

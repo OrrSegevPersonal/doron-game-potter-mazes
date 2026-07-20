@@ -1,6 +1,8 @@
+import { CONFIG } from "./config.js";
+
 // Input: swipe gestures on the play area + on-screen D-pad buttons.
 // Both funnel into a single onMove(dir) callback.
-const Input = {
+export const Input = {
   init(onMove) {
     this.onMove = onMove;
 

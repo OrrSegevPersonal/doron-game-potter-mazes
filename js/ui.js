@@ -1,6 +1,9 @@
+import { CONFIG } from "./config.js";
+import { Storage, formatTime, formatDate } from "./storage.js";
+
 // UI layer: overlays, riddle modal, HUD, and the win fireworks.
 // Game logic lives in game.js — UI only renders and reports interactions.
-const UI = {
+export const UI = {
   init() {
     this.hud = document.getElementById("hud");
     this.dpad = document.getElementById("dpad");

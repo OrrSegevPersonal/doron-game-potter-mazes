@@ -1,3 +1,5 @@
+import { RNG } from "./rng.js";
+
 // Harry Potter riddle bank — 100 plot-deep questions in Hebrew, graded by level (1-5).
 // Each riddle: { id, q, answer, distractors:[3], level }.
 // options are built at runtime as [answer, ...distractors] then shuffled (see shuffleOptions).
@@ -117,7 +119,7 @@ const RIDDLES = [
 
 // Pick a riddle of the given level not already used (by id). Falls back to any
 // level if the pool runs dry. Uses RNG so a fixed seed is reproducible.
-function pickRiddle(level, usedIds) {
+export function pickRiddle(level, usedIds) {
   const used = usedIds || new Set();
   let pool = RIDDLES.filter((r) => r.level === level && !used.has(r.id));
   if (pool.length === 0) pool = RIDDLES.filter((r) => !used.has(r.id));
@@ -129,7 +131,7 @@ function pickRiddle(level, usedIds) {
 // forbiddenPos (0-3 | -1) may not be the resulting answer index, so a repeated
 // position across consecutive gates can be prevented. Retries the shuffle a few
 // times, then relaxes if it can't satisfy the constraint.
-function shuffleOptions(riddle, forbiddenPos) {
+export function shuffleOptions(riddle, forbiddenPos) {
   const base = [riddle.answer, ...riddle.distractors];
   for (let attempt = 0; attempt < 40; attempt++) {
     const opts = RNG.shuffle(base.slice());
